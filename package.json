@@ -1,0 +1,16 @@
+{
+  "name": "bounty-scout",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @bounty-scout/api run dev",
+    "dev:web": "pnpm --filter @bounty-scout/web run dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "db:push": "pnpm --filter @bounty-scout/db run push"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
