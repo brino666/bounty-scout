@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 export function ProgramDetail() {
   const { id } = useParams();
   const [_, setLocation] = useLocation();
-  const { data: program, isLoading } = useGetProgram(id as string, { query: { enabled: !!id } });
+  const { data: program, isLoading } = useGetProgram(Number(id), { query: { enabled: !!id } });
   
   const [expandedProbes, setExpandedProbes] = useState<Set<number>>(new Set());
   
@@ -67,8 +67,8 @@ export function ProgramDetail() {
           probe_item_ref: selectedProbeRef || undefined
         }
       });
-      if (res.finding_id) {
-        setDraftedFindingId(res.finding_id);
+      if (res.id) {
+        setDraftedFindingId(String(res.id));
         setIsDrafting(true);
       }
     } catch (err) {

@@ -133,7 +133,7 @@ async function runAnalysis(programId: number, url: string): Promise<void> {
 - max_reward_usd: estimated top reward in USD (0 if unknown)
 - scope_assets: array of strings describing in-scope targets (e.g. ["*.example.com", "api.example.com"])
 - out_of_scope: array of out-of-scope items
-- probe_guide: array of 5 probe items, each { title: string, description: string, priority: "high"|"medium"|"low" }
+- probe_guide: array of 5 probe items, each { title: string, category: string (e.g. "IDOR", "XSS", "SSRF", "Auth bypass"), priority: "high"|"medium"|"low", rationale: string (why this is worth testing, 1-2 sentences), steps: array of 3-5 numbered plain-English steps to test it }
 ${realScope ? `\nKnown real in-scope assets (use these verbatim, do not invent others): ${JSON.stringify(realScope.scopeAssets)}\nKnown real out-of-scope assets: ${JSON.stringify(realScope.outOfScope)}` : ""}
 
 URL: ${url}
@@ -231,14 +231,16 @@ Program: ${program?.name ?? "Unknown"} (${program?.url ?? ""})
 Vulnerability description: ${finding.vulnDescription}
 ${finding.probeItemRef ? `Related probe: ${finding.probeItemRef}` : ""}
 
-Return a JSON object with:
-- title: concise vulnerability title
+Return a JSON object with exactly these keys:
+- title: concise vulnerability title (e.g. "Stored XSS in profile bio field")
 - severity: "critical" | "high" | "medium" | "low" | "info"
+- cvss_estimate: CVSS v3 score estimate as a string, e.g. "7.5 (High)" — reason briefly
+- vuln_type: CWE or OWASP category (e.g. "CWE-79: Cross-Site Scripting")
+- affected_asset: the specific URL, endpoint, or component that is vulnerable
 - description: detailed technical description (2-3 paragraphs)
-- steps_to_reproduce: array of numbered steps
-- impact: business / security impact statement
-- cwe: CWE identifier e.g. "CWE-79" (best match)
-- cvss_score: CVSS 3.1 base score (number 0-10)
+- impact: what an attacker could achieve, be specific (1-2 paragraphs)
+- poc_steps: array of numbered strings — exact reproduction steps
+- fix_recommendation: concrete remediation advice for the development team (1-2 paragraphs)
 
 Respond with ONLY valid JSON, no markdown.`,
       }],
@@ -336,7 +338,7 @@ router.get("/bounty/stats", async (_req, res): Promise<void> => {
   const [programCount] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(bountyProgramsTable)
-    .where(eq(bountyProgramsTable.status, "active"));
+    .where(sql`${bountyProgramsTable.status} != 'pending_approval'`);
 
   const [earnings] = await db
     .select({ total: sql<number>`coalesce(sum(payout_usd), 0)` })
@@ -349,9 +351,9 @@ router.get("/bounty/stats", async (_req, res): Promise<void> => {
     .groupBy(bountyFindingsTable.status);
 
   res.json({
-    active_programs:    programCount?.count ?? 0,
-    total_earnings_usd: earnings?.total ?? 0,
-    findings_by_status: Object.fromEntries(statusRows.map((r) => [r.status, r.count])),
+    total_programs:     programCount?.count ?? 0,
+    total_paid_usd:      earnings?.total ?? 0,
+    findings_by_status: Object.fromEntries(statusRows.map((r: { status: string; count: number }) => [r.status, r.count])),
   });
 });
 

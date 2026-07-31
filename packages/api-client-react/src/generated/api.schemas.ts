@@ -21,8 +21,10 @@ export const ProbeItemPriority = {
 
 export interface ProbeItem {
   title: string;
-  description: string;
+  category: string;
   priority?: ProbeItemPriority;
+  rationale: string;
+  steps: string[];
 }
 
 export type ProgramPlatform = typeof ProgramPlatform[keyof typeof ProgramPlatform];
@@ -80,13 +82,15 @@ export const ReportSeverity = {
 } as const;
 
 export interface Report {
-  title?: string;
-  severity?: ReportSeverity;
-  description?: string;
-  steps_to_reproduce?: string[];
-  impact?: string;
-  cwe?: string;
-  cvss_score?: number;
+  title: string;
+  severity: ReportSeverity;
+  cvss_estimate: string;
+  vuln_type: string;
+  affected_asset: string;
+  description: string;
+  impact: string;
+  poc_steps: string[];
+  fix_recommendation: string;
 }
 
 export type FindingStatus = typeof FindingStatus[keyof typeof FindingStatus];
@@ -152,8 +156,8 @@ export interface FindingUpdate {
 export type BountyStatsFindingsByStatus = { [key: string]: number };
 
 export interface BountyStats {
-  active_programs: number;
-  total_earnings_usd: number;
+  total_programs: number;
+  total_paid_usd: number;
   findings_by_status: BountyStatsFindingsByStatus;
 }
 

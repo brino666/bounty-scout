@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { useGetFinding, useUpdateFindingStatus, useGetProgram } from "@bounty-scout/api-client-react";
+import { useGetFinding, useUpdateFindingStatus, useGetProgram, type FindingUpdateStatus } from "@bounty-scout/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export function FindingDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
-  const { data: finding, isLoading } = useGetFinding(id as string, { query: { enabled: !!id } });
-  const { data: program } = useGetProgram(finding?.program_id as string, { query: { enabled: !!finding?.program_id } });
+  const { data: finding, isLoading } = useGetFinding(Number(id), { query: { enabled: !!id } });
+  const { data: program } = useGetProgram(Number(finding?.program_id), { query: { enabled: !!finding?.program_id } });
   
   const updateStatus = useUpdateFindingStatus();
   const [copied, setCopied] = useState(false);
@@ -37,8 +37,9 @@ export function FindingDetail() {
     return <div className="p-4 text-center">Finding not found</div>;
   }
 
-  const report = finding.draft_report;
-  
+  // draft_report starts as {} while Claude is still drafting — not a real report yet.
+  const report = finding.draft_report?.title ? finding.draft_report : null;
+
   const fullReportText = report ? `
 **Title:** ${report.title}
 **Severity:** ${report.severity}
@@ -84,7 +85,7 @@ ${report.fix_recommendation}
       await updateStatus.mutateAsync({
         id: finding.id,
         data: {
-          status: nextStatus,
+          status: nextStatus as FindingUpdateStatus,
           notes: notes || undefined,
           payout_usd: nextStatus === "paid" && payout ? parseFloat(payout) : undefined
         }

@@ -33,7 +33,7 @@ export function Programs() {
 
   const { data: pendingPrograms, refetch: refetchPending } = useListPendingPrograms();
   const { data: scoutStatus } = useGetScoutStatus({
-    query: { refetchInterval: 15000 }
+    query: { refetchInterval: 15000, queryKey: ["scoutStatus"] }
   });
   const runScout = useRunScout();
   const approveProgram = useApproveProgram();

@@ -12,10 +12,10 @@
     "push-force": "dotenv -e ../../apps/api/.env -- drizzle-kit push --force --config ./drizzle.config.ts"
   },
   "dependencies": {
-    "drizzle-orm": "^0.36.4",
+    "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",
     "pg": "^8.22.0",
-    "zod": "^3.24.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

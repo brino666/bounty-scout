@@ -63,7 +63,7 @@ export const getBountyStats = async (options?: RequestInit): Promise<BountyStats
 export const getGetBountyStatsQueryKey = () => [`/api/bounty/stats`] as const;
 
 export const getGetBountyStatsQueryOptions = <TData = Awaited<ReturnType<typeof getBountyStats>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getBountyStats>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBountyStats>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetBountyStatsQueryKey();
@@ -72,7 +72,7 @@ export const getGetBountyStatsQueryOptions = <TData = Awaited<ReturnType<typeof 
 };
 
 export function useGetBountyStats<TData = Awaited<ReturnType<typeof getBountyStats>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getBountyStats>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBountyStats>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetBountyStatsQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -91,7 +91,7 @@ export const getAnalyseStatus = async (options?: RequestInit): Promise<AnalyseSt
 export const getGetAnalyseStatusQueryKey = () => [`/api/bounty/analyse-status`] as const;
 
 export const getGetAnalyseStatusQueryOptions = <TData = Awaited<ReturnType<typeof getAnalyseStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getAnalyseStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAnalyseStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetAnalyseStatusQueryKey();
@@ -100,7 +100,7 @@ export const getGetAnalyseStatusQueryOptions = <TData = Awaited<ReturnType<typeo
 };
 
 export function useGetAnalyseStatus<TData = Awaited<ReturnType<typeof getAnalyseStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getAnalyseStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAnalyseStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetAnalyseStatusQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -119,7 +119,7 @@ export const getDraftStatus = async (options?: RequestInit): Promise<DraftStatus
 export const getGetDraftStatusQueryKey = () => [`/api/bounty/draft-status`] as const;
 
 export const getGetDraftStatusQueryOptions = <TData = Awaited<ReturnType<typeof getDraftStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getDraftStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraftStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetDraftStatusQueryKey();
@@ -128,7 +128,7 @@ export const getGetDraftStatusQueryOptions = <TData = Awaited<ReturnType<typeof 
 };
 
 export function useGetDraftStatus<TData = Awaited<ReturnType<typeof getDraftStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getDraftStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraftStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDraftStatusQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -147,7 +147,7 @@ export const getScoutStatus = async (options?: RequestInit): Promise<ScoutStatus
 export const getGetScoutStatusQueryKey = () => [`/api/bounty/scout/status`] as const;
 
 export const getGetScoutStatusQueryOptions = <TData = Awaited<ReturnType<typeof getScoutStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getScoutStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getScoutStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetScoutStatusQueryKey();
@@ -156,7 +156,7 @@ export const getGetScoutStatusQueryOptions = <TData = Awaited<ReturnType<typeof 
 };
 
 export function useGetScoutStatus<TData = Awaited<ReturnType<typeof getScoutStatus>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getScoutStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getScoutStatus>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetScoutStatusQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -199,7 +199,7 @@ export const listPendingPrograms = async (options?: RequestInit): Promise<Progra
 export const getListPendingProgramsQueryKey = () => [`/api/bounty/programs/pending`] as const;
 
 export const getListPendingProgramsQueryOptions = <TData = Awaited<ReturnType<typeof listPendingPrograms>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPendingPrograms>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listPendingPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getListPendingProgramsQueryKey();
@@ -208,7 +208,7 @@ export const getListPendingProgramsQueryOptions = <TData = Awaited<ReturnType<ty
 };
 
 export function useListPendingPrograms<TData = Awaited<ReturnType<typeof listPendingPrograms>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPendingPrograms>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listPendingPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListPendingProgramsQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -223,7 +223,7 @@ export const listPrograms = async (options?: RequestInit): Promise<Program[]> =>
 export const getListProgramsQueryKey = () => [`/api/bounty/programs`] as const;
 
 export const getListProgramsQueryOptions = <TData = Awaited<ReturnType<typeof listPrograms>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPrograms>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getListProgramsQueryKey();
@@ -232,7 +232,7 @@ export const getListProgramsQueryOptions = <TData = Awaited<ReturnType<typeof li
 };
 
 export function useListPrograms<TData = Awaited<ReturnType<typeof listPrograms>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listPrograms>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListProgramsQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -281,7 +281,7 @@ export const getGetProgramQueryKey = (id: number) => [`/api/bounty/programs/${id
 
 export const getGetProgramQueryOptions = <TData = Awaited<ReturnType<typeof getProgram>>, TError = ErrorType<ErrorResponse>>(
   id: number,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getProgram>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgram>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetProgramQueryKey(id);
@@ -291,7 +291,7 @@ export const getGetProgramQueryOptions = <TData = Awaited<ReturnType<typeof getP
 
 export function useGetProgram<TData = Awaited<ReturnType<typeof getProgram>>, TError = ErrorType<ErrorResponse>>(
   id: number,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getProgram>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getProgram>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetProgramQueryOptions(id, options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -366,7 +366,7 @@ export const listFindings = async (options?: RequestInit): Promise<Finding[]> =>
 export const getListFindingsQueryKey = () => [`/api/bounty/findings`] as const;
 
 export const getListFindingsQueryOptions = <TData = Awaited<ReturnType<typeof listFindings>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listFindings>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listFindings>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getListFindingsQueryKey();
@@ -375,7 +375,7 @@ export const getListFindingsQueryOptions = <TData = Awaited<ReturnType<typeof li
 };
 
 export function useListFindings<TData = Awaited<ReturnType<typeof listFindings>>, TError = ErrorType<unknown>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof listFindings>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listFindings>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListFindingsQueryOptions(options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
@@ -424,7 +424,7 @@ export const getGetFindingQueryKey = (id: number) => [`/api/bounty/findings/${id
 
 export const getGetFindingQueryOptions = <TData = Awaited<ReturnType<typeof getFinding>>, TError = ErrorType<ErrorResponse>>(
   id: number,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getFinding>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFinding>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
   const queryKey = queryOptions?.queryKey ?? getGetFindingQueryKey(id);
@@ -434,7 +434,7 @@ export const getGetFindingQueryOptions = <TData = Awaited<ReturnType<typeof getF
 
 export function useGetFinding<TData = Awaited<ReturnType<typeof getFinding>>, TError = ErrorType<ErrorResponse>>(
   id: number,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getFinding>>, TError, TData>, request?: SecondParameter<typeof customFetch> }
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFinding>>, TError, TData>>, request?: SecondParameter<typeof customFetch> }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetFindingQueryOptions(id, options);
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
