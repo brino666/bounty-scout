@@ -3,8 +3,8 @@ import { eq, sql, desc } from "drizzle-orm";
 import { Anthropic } from "@anthropic-ai/sdk";
 import { db, bountyProgramsTable, bountyFindingsTable, FINDING_TRANSITIONS } from "@bounty-scout/db";
 import { z } from "zod";
-import { hasH1Credentials, listOpenPrograms, getProgramScope } from "../lib/hackerone";
-import { logger } from "../lib/logger";
+import { hasH1Credentials, listOpenPrograms, getProgramScope } from "../lib/hackerone.js";
+import { logger } from "../lib/logger.js";
 
 const router = Router();
 const anthropic = new Anthropic();

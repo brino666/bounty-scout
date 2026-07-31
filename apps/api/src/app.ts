@@ -1,8 +1,8 @@
 import { createRequire } from "node:module";
 import express, { type Express } from "express";
 import cors from "cors";
-import router from "./routes";
-import { logger } from "./lib/logger";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
 
 // pino-http is CJS-only and its default-export typing resolves inconsistently
 // across bundlers (works locally, fails under Vercel's function compiler).
