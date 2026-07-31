@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { eq, sql, desc } from "drizzle-orm";
-import Anthropic from "@anthropic-ai/sdk";
+import { Anthropic } from "@anthropic-ai/sdk";
 import { db, bountyProgramsTable, bountyFindingsTable, FINDING_TRANSITIONS } from "@bounty-scout/db";
 import { z } from "zod";
 import { hasH1Credentials, listOpenPrograms, getProgramScope } from "../lib/hackerone";
