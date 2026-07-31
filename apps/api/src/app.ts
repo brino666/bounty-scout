@@ -1,8 +1,14 @@
+import { createRequire } from "node:module";
 import express, { type Express } from "express";
 import cors from "cors";
-import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+// pino-http is CJS-only and its default-export typing resolves inconsistently
+// across bundlers (works locally, fails under Vercel's function compiler).
+// Load it via require to sidestep the interop ambiguity entirely.
+const require = createRequire(import.meta.url);
+const pinoHttp = require("pino-http");
 
 const app: Express = express();
 
@@ -10,14 +16,14 @@ app.use(
   pinoHttp({
     logger,
     serializers: {
-      req(req) {
+      req(req: any) {
         return {
           id: req.id,
           method: req.method,
           url: req.url?.split("?")[0],
         };
       },
-      res(res) {
+      res(res: any) {
         return {
           statusCode: res.statusCode,
         };
