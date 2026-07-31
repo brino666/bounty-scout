@@ -7,8 +7,6 @@ import {
   integer,
   jsonb,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Programs — scouted bug bounty programs + recon data + probe guide
@@ -33,10 +31,6 @@ export const bountyProgramsTable = pgTable("bounty_programs", {
   analysedAt:     timestamp("analysed_at"),
 });
 
-export const insertBountyProgramSchema = createInsertSchema(bountyProgramsTable).omit({
-  id: true, addedAt: true,
-});
-export type InsertBountyProgram = z.infer<typeof insertBountyProgramSchema>;
 export type BountyProgram = typeof bountyProgramsTable.$inferSelect;
 
 // ---------------------------------------------------------------------------
@@ -64,10 +58,6 @@ export const bountyFindingsTable = pgTable("bounty_findings", {
   updatedAt:        timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertBountyFindingSchema = createInsertSchema(bountyFindingsTable).omit({
-  id: true, createdAt: true, updatedAt: true,
-});
-export type InsertBountyFinding = z.infer<typeof insertBountyFindingSchema>;
 export type BountyFinding = typeof bountyFindingsTable.$inferSelect;
 
 // ---------------------------------------------------------------------------
