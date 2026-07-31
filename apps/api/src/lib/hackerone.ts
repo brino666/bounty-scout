@@ -8,6 +8,8 @@
 // Every call here is read-only except submitReport, which posts a real
 // disclosure to a live program — it is never called automatically.
 
+import { logger } from "./logger.js";
+
 const BASE = "https://api.hackerone.com/v1";
 
 export function hasH1Credentials(): boolean {
@@ -54,23 +56,39 @@ export interface H1ProgramSummary {
 export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
   const results: H1ProgramSummary[] = [];
   let url = `/hackers/programs?page[size]=100`;
+  let rawTotal = 0;
+  let loggedSample = false;
 
   while (url) {
     const page = await h1Fetch(url);
-    for (const item of page.data ?? []) {
+    const items = page.data ?? [];
+    rawTotal += items.length;
+
+    if (!loggedSample && items.length > 0) {
+      // One-time diagnostic: log the real shape HackerOne actually returns,
+      // since filtering below depends on guessing the right attribute names.
+      logger.info({ sampleAttributes: items[0].attributes }, "HackerOne program sample (diagnostic)");
+      loggedSample = true;
+    }
+
+    for (const item of items) {
       const attrs = item.attributes ?? {};
-      if (attrs.submission_state !== "open") continue;
+      // HackerOne's field for "currently accepting reports" — try the
+      // documented name first, fall back to alternates seen in the wild.
+      const submissionState = attrs.submission_state ?? attrs.state;
+      if (submissionState !== "open" && submissionState !== "public_mode") continue;
       results.push({
         handle: attrs.handle,
         name: attrs.name ?? attrs.handle,
         url: `https://hackerone.com/${attrs.handle}`,
         offersBounties: !!attrs.offers_bounties,
-        submissionState: attrs.submission_state,
+        submissionState: submissionState ?? "unknown",
       });
     }
     url = page.links?.next ? page.links.next.replace(BASE, "") : "";
   }
 
+  logger.info({ rawTotal, filtered: results.length }, "HackerOne program scan: raw vs filtered count");
   return results;
 }
 
