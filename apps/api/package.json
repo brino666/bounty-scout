@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development PORT=8080 tsx watch src/index.ts",
-    "build": "node ./build.mjs",
+    "dev": "pnpm --filter @bounty-scout/db run build && NODE_ENV=development PORT=8080 tsx watch src/index.ts",
+    "build": "pnpm --filter @bounty-scout/db run build && node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
