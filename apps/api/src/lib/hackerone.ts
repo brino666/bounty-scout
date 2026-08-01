@@ -41,7 +41,7 @@ async function h1FetchOnce(path: string, init?: RequestInit): Promise<any> {
         Connection: "close",
         ...(init?.headers ?? {}),
       },
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(40000),
     });
     logger.info({ path, status: res.status, ms: Date.now() - started }, "HackerOne API call");
     if (!res.ok) {
@@ -85,14 +85,16 @@ export interface H1ProgramSummary {
  */
 export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
   const results: H1ProgramSummary[] = [];
-  let url = `/hackers/programs?page[size]=10`;
+  let url = `/hackers/programs?page[size]=25`;
   let rawTotal = 0;
   let loggedSample = false;
   let pagesFetched = 0;
-  // HackerOne gets noticeably slower on deeper pages regardless of page size
-  // (offset-scan pagination, most likely) — pages 1-3 were consistently fast
-  // in testing (2-4s), page 4+ got slow/timed out. Stay shallow.
-  const MAX_PAGES = 3;
+  // Every request to this endpoint has been slow in testing (12-45s), not
+  // just deep pages — HackerOne's API itself seems to be uniformly slow for
+  // this account/token right now, not something tunable via pagination
+  // depth. Take one larger page and stop, rather than compounding the risk
+  // of a multi-request scan by chaining several slow requests together.
+  const MAX_PAGES = 1;
 
   while (url && pagesFetched < MAX_PAGES) {
     pagesFetched++;
