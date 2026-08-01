@@ -23,21 +23,28 @@ function authHeader(): string {
 }
 
 async function h1Fetch(path: string, init?: RequestInit): Promise<any> {
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: {
-      Authorization: authHeader(),
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`HackerOne API ${res.status} on ${path}: ${body.slice(0, 300)}`);
+  const started = Date.now();
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      ...init,
+      headers: {
+        Authorization: authHeader(),
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+      signal: AbortSignal.timeout(25000),
+    });
+    logger.info({ path, status: res.status, ms: Date.now() - started }, "HackerOne API call");
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`HackerOne API ${res.status} on ${path}: ${body.slice(0, 300)}`);
+    }
+    return res.json();
+  } catch (err) {
+    logger.error({ path, ms: Date.now() - started, err: err instanceof Error ? err.message : err }, "HackerOne API call failed");
+    throw err;
   }
-  return res.json();
 }
 
 export interface H1ProgramSummary {
@@ -55,11 +62,14 @@ export interface H1ProgramSummary {
  */
 export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
   const results: H1ProgramSummary[] = [];
-  let url = `/hackers/programs?page[size]=100`;
+  let url = `/hackers/programs?page[size]=50`;
   let rawTotal = 0;
   let loggedSample = false;
+  let pagesFetched = 0;
+  const MAX_PAGES = 8; // bounds total runtime — a scan is meant to be quick, not exhaustive
 
-  while (url) {
+  while (url && pagesFetched < MAX_PAGES) {
+    pagesFetched++;
     const page = await h1Fetch(url);
     const items = page.data ?? [];
     rawTotal += items.length;
@@ -88,7 +98,10 @@ export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
     url = page.links?.next ? page.links.next.replace(BASE, "") : "";
   }
 
-  logger.info({ rawTotal, filtered: results.length }, "HackerOne program scan: raw vs filtered count");
+  logger.info(
+    { rawTotal, filtered: results.length, pagesFetched, hitPageCap: pagesFetched >= MAX_PAGES },
+    "HackerOne program scan: raw vs filtered count",
+  );
   return results;
 }
 
