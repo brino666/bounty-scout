@@ -152,6 +152,19 @@ async function runAnalysis(programId: number, url: string): Promise<void> {
 - scope_assets: array of strings describing in-scope targets (e.g. ["*.example.com", "api.example.com"])
 - out_of_scope: array of out-of-scope items
 - probe_guide: array of 5 probe items, each { title: string, category: string (e.g. "IDOR", "XSS", "SSRF", "Auth bypass"), priority: "high"|"medium"|"low", rationale: string (why this is worth testing, 1-2 sentences), steps: array of 3-5 numbered plain-English steps to test it }
+
+CRITICAL RULE for every probe's steps: the hacker executing these will be a
+person with limited security experience testing by hand, not a scripted
+scanner. Every step must be something they can do safely using ONLY
+accounts/data they themselves control (e.g. two of their own test accounts
+to compare access). NEVER write a step that tells them to enumerate,
+increment, guess, or brute-force IDs/tokens/URLs in order to find or access
+OTHER real users' private data — that crosses from testing a mechanism into
+actually accessing strangers' data, which is out of bounds on virtually every
+bug bounty program regardless of the target being in scope. If an IDOR/access-
+control idea only becomes provable by touching another real user's data,
+reframe it as a same-account-family comparison test instead (owner account
+vs. a second account you created, never real third parties).
 ${realScope ? `\nKnown real in-scope assets (use these verbatim, do not invent others): ${JSON.stringify(realScope.scopeAssets)}\nKnown real out-of-scope assets: ${JSON.stringify(realScope.outOfScope)}` : ""}
 
 URL: ${url}
