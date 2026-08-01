@@ -62,11 +62,14 @@ export interface H1ProgramSummary {
  */
 export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
   const results: H1ProgramSummary[] = [];
-  let url = `/hackers/programs?page[size]=5`;
+  let url = `/hackers/programs?page[size]=10`;
   let rawTotal = 0;
   let loggedSample = false;
   let pagesFetched = 0;
-  const MAX_PAGES = 5; // small + few pages while we isolate whether size or something else is slow
+  // HackerOne gets noticeably slower on deeper pages regardless of page size
+  // (offset-scan pagination, most likely) — pages 1-3 were consistently fast
+  // in testing (2-4s), page 4+ got slow/timed out. Stay shallow.
+  const MAX_PAGES = 3;
 
   while (url && pagesFetched < MAX_PAGES) {
     pagesFetched++;
