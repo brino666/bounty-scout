@@ -17,8 +17,22 @@ let activeAnalyse: { programId: number; log: string } | null = null;
 let analyseLastFinishedAt: Date | null = null;
 let activeDraft: { findingId: number; log: string } | null = null;
 let scoutRunning = false;
+let scoutStartedAt: Date | null = null;
 let scoutLastRunAt: Date | null = null;
 let scoutLastFoundCount = 0;
+// Serverless instances can get frozen/killed between requests, which can
+// strand this flag on true forever even though nothing is actually running
+// anymore. Treat anything older than this as dead rather than trusting it.
+const SCOUT_STALE_MS = 90_000;
+
+function isScoutActuallyRunning(): boolean {
+  if (!scoutRunning) return false;
+  if (scoutStartedAt && Date.now() - scoutStartedAt.getTime() > SCOUT_STALE_MS) {
+    scoutRunning = false;
+    return false;
+  }
+  return true;
+}
 
 // ---------------------------------------------------------------------------
 // Zod request schemas
@@ -174,8 +188,9 @@ Respond with ONLY valid JSON, no markdown.`,
 // ---------------------------------------------------------------------------
 
 async function runDiscoveryScan(): Promise<void> {
-  if (scoutRunning || !hasH1Credentials()) return;
+  if (isScoutActuallyRunning() || !hasH1Credentials()) return;
   scoutRunning = true;
+  scoutStartedAt = new Date();
   try {
     const programs = await listOpenPrograms();
     let found = 0;
@@ -200,12 +215,6 @@ async function runDiscoveryScan(): Promise<void> {
   }
 }
 
-// Auto-run every 6 hours if credentials are configured; first run 30s after boot
-// so it doesn't compete with server startup.
-if (hasH1Credentials()) {
-  setTimeout(() => runDiscoveryScan().catch(() => {}), 30_000);
-  setInterval(() => runDiscoveryScan().catch(() => {}), 6 * 60 * 60 * 1000);
-}
 
 async function runDraft(findingId: number): Promise<void> {
   try {
@@ -273,7 +282,7 @@ Respond with ONLY valid JSON, no markdown.`,
 router.get("/bounty/scout/status", (_req, res): void => {
   res.json({
     enabled: hasH1Credentials(),
-    running: scoutRunning,
+    running: isScoutActuallyRunning(),
     last_run_at: scoutLastRunAt?.toISOString() ?? null,
     last_found_count: scoutLastFoundCount,
   });
@@ -285,7 +294,7 @@ router.post("/bounty/scout/run", (_req, res): void => {
     res.status(400).json({ ok: false, error: "H1_API_USERNAME / H1_API_TOKEN are not configured" });
     return;
   }
-  if (scoutRunning) {
+  if (isScoutActuallyRunning()) {
     res.json({ ok: true, message: "Scan already running" });
     return;
   }
