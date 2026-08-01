@@ -22,7 +22,11 @@ function authHeader(): string {
   return "Basic " + Buffer.from(`${user}:${token}`).toString("base64");
 }
 
-async function h1Fetch(path: string, init?: RequestInit): Promise<any> {
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function h1FetchOnce(path: string, init?: RequestInit): Promise<any> {
   const started = Date.now();
   try {
     const res = await fetch(`${BASE}${path}`, {
@@ -31,6 +35,10 @@ async function h1Fetch(path: string, init?: RequestInit): Promise<any> {
         Authorization: authHeader(),
         Accept: "application/json",
         "Content-Type": "application/json",
+        // Serverless functions reusing a stale pooled keep-alive connection
+        // is a known cause of exactly this symptom (intermittent hangs/
+        // resets on some requests, others fine) — force a fresh connection.
+        Connection: "close",
         ...(init?.headers ?? {}),
       },
       signal: AbortSignal.timeout(25000),
@@ -44,6 +52,21 @@ async function h1Fetch(path: string, init?: RequestInit): Promise<any> {
   } catch (err) {
     logger.error({ path, ms: Date.now() - started, err: err instanceof Error ? err.message : err }, "HackerOne API call failed");
     throw err;
+  }
+}
+
+/**
+ * Same failing request has come back fast on a later attempt more often
+ * than not — one retry after a short pause catches most of that flakiness
+ * without meaningfully slowing down the common case where nothing failed.
+ */
+async function h1Fetch(path: string, init?: RequestInit): Promise<any> {
+  try {
+    return await h1FetchOnce(path, init);
+  } catch (err) {
+    logger.warn({ path }, "HackerOne API call failed once, retrying after a short pause");
+    await sleep(1500);
+    return h1FetchOnce(path, init);
   }
 }
 
