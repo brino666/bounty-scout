@@ -61,6 +61,7 @@ export function Programs() {
   useEffect(() => {
     if (isPolling && analyseStatus && !analyseStatus.running) {
       setIsPolling(false);
+      setIsAddOpen(false);
       refetch();
     }
   }, [analyseStatus, isPolling, refetch]);

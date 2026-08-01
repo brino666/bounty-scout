@@ -1,20 +1,41 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { useGetProgram, useAddFinding, useGetDraftStatus } from "@bounty-scout/api-client-react";
+import { useGetProgram, useAddFinding, useGetDraftStatus, useApproveProgram, useGetAnalyseStatus } from "@bounty-scout/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ChevronDown, ChevronRight, ExternalLink, ShieldAlert, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ExternalLink, ShieldAlert, Loader2, AlertTriangle } from "lucide-react";
 import { getPriorityColor } from "@/lib/colors";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export function ProgramDetail() {
   const { id } = useParams();
   const [_, setLocation] = useLocation();
-  const { data: program, isLoading } = useGetProgram(Number(id), { query: { enabled: !!id } });
-  
+  const { data: program, isLoading, refetch: refetchProgram } = useGetProgram(Number(id), { query: { enabled: !!id } });
+
   const [expandedProbes, setExpandedProbes] = useState<Set<number>>(new Set());
+
+  // Retry state — for when a program's analysis previously failed (e.g. a
+  // truncated Claude response) and needs to be re-run.
+  const approveProgram = useApproveProgram();
+  const [isRetrying, setIsRetrying] = useState(false);
+  const { data: analyseStatus } = useGetAnalyseStatus({
+    query: { enabled: isRetrying, refetchInterval: isRetrying ? 2000 : false, queryKey: ["analyseStatus"] }
+  });
+
+  useEffect(() => {
+    if (isRetrying && analyseStatus && !analyseStatus.running) {
+      setIsRetrying(false);
+      refetchProgram();
+    }
+  }, [analyseStatus, isRetrying, refetchProgram]);
+
+  const handleRetry = async () => {
+    if (!program) return;
+    await approveProgram.mutateAsync({ id: program.id });
+    setIsRetrying(true);
+  };
   
   // Finding submission state
   const [isLogFindingOpen, setIsLogFindingOpen] = useState(false);
@@ -92,6 +113,22 @@ export function ProgramDetail() {
           <ExternalLink className="h-5 w-5" />
         </a>
       </header>
+
+      {program.status === "failed" && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <p className="text-sm">
+              {isRetrying ? "Retrying analysis…" : "Analysis failed — Claude's response didn't come back usable. No scope or probe guide was generated."}
+            </p>
+          </div>
+          {!isRetrying && (
+            <Button size="sm" variant="outline" onClick={handleRetry} disabled={approveProgram.isPending}>
+              {approveProgram.isPending ? "Starting…" : "Retry"}
+            </Button>
+          )}
+        </div>
+      )}
 
       <Card className="border-dashed bg-secondary/50">
         <CardContent className="p-4 space-y-4">

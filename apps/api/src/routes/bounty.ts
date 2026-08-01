@@ -138,7 +138,11 @@ async function runAnalysis(programId: number, url: string): Promise<void> {
     if (activeAnalyse) activeAnalyse.log = "Generating probe guide with Claude…";
     const msg = await anthropic.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 1024,
+      // 1024 was too tight for 5 full probe items (title/category/priority/
+      // rationale/3-5 steps each) — Claude's response was getting cut off
+      // mid-string, which broke JSON.parse and silently failed the whole
+      // analysis (confirmed via Vercel logs: "Unterminated string in JSON").
+      max_tokens: 3072,
       messages: [{
         role: "user",
         content: `You are a bug bounty analyst. Analyse this bug bounty program URL and return a JSON object with these fields:
@@ -316,7 +320,11 @@ router.post("/bounty/programs/:id/approve", async (req, res): Promise<void> => {
   if (!p.success) { res.status(400).json({ error: "Invalid id" }); return; }
   const [row] = await db.select().from(bountyProgramsTable).where(eq(bountyProgramsTable.id, p.data.id));
   if (!row) { res.status(404).json({ error: "Program not found" }); return; }
-  if (row.status !== "pending_approval") { res.status(422).json({ error: `Program is '${row.status}', not pending approval` }); return; }
+  // "failed" is allowed too — this doubles as the retry action when a
+  // previous analysis attempt errored out (e.g. a truncated Claude response).
+  if (row.status !== "pending_approval" && row.status !== "failed") {
+    res.status(422).json({ error: `Program is '${row.status}', not pending approval` }); return;
+  }
 
   await db.update(bountyProgramsTable).set({ status: "analysing" }).where(eq(bountyProgramsTable.id, p.data.id));
 
