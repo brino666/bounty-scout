@@ -33,7 +33,9 @@ export function Programs() {
 
   const { data: pendingPrograms, refetch: refetchPending } = useListPendingPrograms();
   const { data: scoutStatus } = useGetScoutStatus({
-    query: { refetchInterval: 15000, queryKey: ["scoutStatus"] }
+    // Cheap endpoint — poll often so the button's state (and when a scan
+    // actually finishes) reflects reality within a few seconds, not 15.
+    query: { refetchInterval: 4000, queryKey: ["scoutStatus"] }
   });
   const runScout = useRunScout();
   const approveProgram = useApproveProgram();
@@ -91,7 +93,7 @@ export function Programs() {
           {scoutStatus?.enabled && (
             <Button variant="outline" size="sm" onClick={handleScanNow} disabled={runScout.isPending || scoutStatus.running}>
               <Search className="h-4 w-4 mr-1.5" />
-              {scoutStatus.running ? "Scanning…" : "Scan for new programs"}
+              {runScout.isPending || scoutStatus.running ? "Scanning…" : "Scan for new programs"}
             </Button>
           )}
           <Button size="icon" onClick={() => setIsAddOpen(true)}>
