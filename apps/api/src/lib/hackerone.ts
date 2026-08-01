@@ -62,11 +62,11 @@ export interface H1ProgramSummary {
  */
 export async function listOpenPrograms(): Promise<H1ProgramSummary[]> {
   const results: H1ProgramSummary[] = [];
-  let url = `/hackers/programs?page[size]=50`;
+  let url = `/hackers/programs?page[size]=5`;
   let rawTotal = 0;
   let loggedSample = false;
   let pagesFetched = 0;
-  const MAX_PAGES = 8; // bounds total runtime — a scan is meant to be quick, not exhaustive
+  const MAX_PAGES = 5; // small + few pages while we isolate whether size or something else is slow
 
   while (url && pagesFetched < MAX_PAGES) {
     pagesFetched++;
